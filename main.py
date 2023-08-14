@@ -3,11 +3,15 @@ import base64
 import hashlib
 from Crypto.Cipher import AES
 
-connect = pymysql.connect(host='127.0.0.1', user='root', password='12341234', db='Project_info')
+hostI = input("데이터베이스 호스트를 입력해주세요. : ")
+userI = input("아이디를 입력해주세요. : ")
+passwordI = input("비밀번호를 입력해주세요. : ")
+schemaI = input("접근할 스키마를 입력해주세요. : ")
+
+connect = pymysql.connect(host=hostI, user=userI, password=passwordI, db=schemaI)
 cursor = connect.cursor()
 
-key = "input_key"
-data = "input_data"
+key = 'easternsky'
 
 BS = 16
 pad = (lambda s: s+ (BS - len(s) % BS) * chr(BS - len(s) % BS).encode())
@@ -16,8 +20,6 @@ unpad = (lambda s: s[:-ord(s[len(s)-1:])])
 class AESCipher(object):
     def __init__(self, key):
         self.key = hashlib.sha256(key.encode()).digest()
-        print("AES Key", key)
-        print("AES Key 암호화 결과:", self.key)
 
     def encrypt(self, message):
         message = message.encode()
@@ -30,25 +32,49 @@ class AESCipher(object):
         return chr(0) * 16
 
 aes = AESCipher(key)
-encrypt = aes.encrypt(data)
 
-print("암호화 전 데이터:", data)
-print("암호화 후 데이터:", encrypt)
+def locationEncrypt(rows):
+    for  row in rows:
+        if row[1] == "0" or row[2] == "0":
+            print(f'id {row[0]} 데이터 위도 및 경도 없음')
+            continue
+        encrypted_lat, encrypted_lon = aes.encrypt(row[1]), aes.encrypt(row[2])
+        cursor.execute(update_query, (encrypted_lat, encrypted_lon, row[0]))
+        connect.commit()
+        print(f'id {row[0]} 데이터 암호화 완료')
 
+selectI = int(input("모든 테이블 대상의 암호화는 0, 하나의 테이블 대상의 암호화는 1을 입력해주세요. : "))
 
-cursor.execute("SELECT * FROM users")
+if selectI:
+    tableI = input("암호화할 대상 테이블을 입력해주세요. : ")
 
+    select_query = f"SELECT id, longitude, latitude FROM {tableI}"
+    update_query = f"UPDATE {tableI} SET latitude = %s, longitude = %s WHERE id = %s"
+    cursor.execute(select_query)
+
+    rows = cursor.fetchall()
+    locationEncrypt(rows)
+else:
+    show_query = 'SHOW TABLES'
+    cursor.execute(show_query)
+    tables = cursor.fetchall()
+
+    for table in tables:
+        try:
+            select_query = f"SELECT id, longitude, latitude FROM {table[0]}"
+            update_query = f"UPDATE {table[0]} SET latitude = %s, longitude = %s WHERE id = %s"
+
+            cursor.execute(select_query)
+            rows = cursor.fetchall()
+
+            print(f"{table[0]} 테이블 대상 위치 정보 암호화 진행")
+            locationEncrypt(rows)
+            print(f"{table[0]} 테이블 대상 암호화 완료")
+        except:
+            print(f"{table[0]} 테이블은 위치 정보가 없습니다.")
+            continue
 
 connect.commit()
 connect.close()
 
-
-
-
-
-# hostI = input("데이터베이스 호스트를 입력해주세요. : ")
-# userI = input("아이디를 입력해주세요. : ")
-# passwordI = input("비밀번호를 입력해주세요. : ")
-#
-
-# connect = pymysql.connect(host=hostI, user=userI, password=passwordI, db='Project_info')
+print("프로그램이 종료됩니다.")
