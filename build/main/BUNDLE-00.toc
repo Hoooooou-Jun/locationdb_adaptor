@@ -1,3 +1,0 @@
-([('main',
-   '/Users/hoooooou_jun/esg_locationdb_migration/dist/main',
-   'EXECUTABLE')],)
