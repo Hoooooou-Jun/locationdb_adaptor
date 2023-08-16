@@ -48,7 +48,7 @@ selectI = int(input("모든 테이블 대상의 암호화는 0, 하나의 테이
 if selectI:
     tableI = input("암호화할 대상 테이블을 입력해주세요. : ")
 
-    select_query = f"SELECT id, longitude, latitude FROM {tableI}"
+    select_query = f"SELECT id, latitude, longitude, FROM {tableI}"
     update_query = f"UPDATE {tableI} SET latitude = %s, longitude = %s WHERE id = %s"
     cursor.execute(select_query)
 
@@ -61,7 +61,7 @@ else:
 
     for table in tables:
         try:
-            select_query = f"SELECT id, longitude, latitude FROM {table[0]}"
+            select_query = f"SELECT id, latitude, longitude FROM {table[0]}"
             update_query = f"UPDATE {table[0]} SET latitude = %s, longitude = %s WHERE id = %s"
 
             cursor.execute(select_query)
