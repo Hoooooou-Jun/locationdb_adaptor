@@ -1,0 +1,6 @@
+altgraph==0.17.3
+macholib==1.16.2
+pycryptodome==3.18.0
+pyinstaller==5.13.0
+pyinstaller-hooks-contrib==2023.6
+PyMySQL==1.1.0
