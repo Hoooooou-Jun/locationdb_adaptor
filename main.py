@@ -4,11 +4,12 @@ import hashlib
 from Crypto.Cipher import AES
 
 hostI = input("데이터베이스 호스트를 입력해주세요. : ")
+portI = int(input("포트를 입력해주세요. : "))
 userI = input("아이디를 입력해주세요. : ")
 passwordI = input("비밀번호를 입력해주세요. : ")
 schemaI = input("접근할 스키마를 입력해주세요. : ")
 
-connect = pymysql.connect(host=hostI, user=userI, password=passwordI, db=schemaI)
+connect = pymysql.connect(host=hostI, port=portI, user=userI, password=passwordI, db=schemaI)
 cursor = connect.cursor()
 
 key = 'easternsky'
